@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: flood-risk-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --app-dir backend
+    envVars:
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: OPENROUTESERVICE_API_KEY
+        sync: false
+      - key: SHELTER_DATASET_PATH
+        value: data/external/shelters.csv
+      - key: PYTHON_VERSION
+        value: 3.10.13
+
+  - type: web
+    name: flood-risk-frontend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r frontend/requirements.txt
+    startCommand: streamlit run frontend/streamlit_app.py --server.address 0.0.0.0 --server.port $PORT
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: flood-risk-backend
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: PYTHON_VERSION
+        value: 3.10.13

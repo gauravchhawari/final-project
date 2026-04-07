@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flood-risk-backend-ingress
+spec:
+  rules:
+    - host: flood-risk.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: flood-risk-backend-service
+                port:
+                  number: 80
+

@@ -1,0 +1,51 @@
+# Virtual Environment
+venv/
+.env/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# SQLite (if used)
+*.sqlite3
+*.db
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# FastAPI / general temp
+*.out
+*.err
+
+# Jupyter (if used)
+.ipynb_checkpoints/
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Node (if frontend later)
+node_modules/
+
+# Local matplotlib cache
+.mplconfig/

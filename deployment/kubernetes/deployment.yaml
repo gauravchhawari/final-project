@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flood-risk-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flood-risk-backend
+  template:
+    metadata:
+      labels:
+        app: flood-risk-backend
+    spec:
+      containers:
+        - name: backend
+          image: flood-risk-backend:latest
+          ports:
+            - containerPort: 8000
+

@@ -1,0 +1,89 @@
+{
+  "dataset_path": "C:\\Users\\gujja\\OneDrive\\Desktop\\flood-risk-system\\data\\raw\\gurugram_flood_dataset.csv",
+  "target_column": "flood_label",
+  "timestamp_column": "datetime",
+  "split_strategy": "chronological",
+  "models": [
+    {
+      "model_name": "rf",
+      "artifact_path": "C:\\Users\\gujja\\OneDrive\\Desktop\\flood-risk-system\\backend\\app\\models\\saved\\rf_model.pkl",
+      "metrics": {
+        "accuracy": 1.0,
+        "precision_weighted": 1.0,
+        "recall_weighted": 1.0,
+        "f1_weighted": 1.0
+      },
+      "feature_columns": [
+        "rainfall_mm",
+        "temperature_c",
+        "water_level_m",
+        "rain_24h",
+        "rain_48h",
+        "hour",
+        "day",
+        "month",
+        "water_level_prev_1",
+        "water_level_delta"
+      ],
+      "target_classes": [
+        "0",
+        "1"
+      ],
+      "model_type": "sklearn"
+    },
+    {
+      "model_name": "xgb",
+      "artifact_path": "C:\\Users\\gujja\\OneDrive\\Desktop\\flood-risk-system\\backend\\app\\models\\saved\\xgb_model.pkl",
+      "metrics": {
+        "accuracy": 0.9992856122303186,
+        "precision_weighted": 0.9993712773451905,
+        "recall_weighted": 0.9992856122303186,
+        "f1_weighted": 0.9993144971412917
+      },
+      "feature_columns": [
+        "rainfall_mm",
+        "temperature_c",
+        "water_level_m",
+        "rain_24h",
+        "rain_48h",
+        "hour",
+        "day",
+        "month",
+        "water_level_prev_1",
+        "water_level_delta"
+      ],
+      "target_classes": [
+        "0",
+        "1"
+      ],
+      "model_type": "sklearn"
+    },
+    {
+      "model_name": "lstm",
+      "artifact_path": "C:\\Users\\gujja\\OneDrive\\Desktop\\flood-risk-system\\backend\\app\\models\\saved\\lstm_model.h5",
+      "metrics": {
+        "accuracy": 0.9975710815830833,
+        "precision_weighted": 0.9951480628108426,
+        "recall_weighted": 0.9975710815830833,
+        "f1_weighted": 0.9963580990791914
+      },
+      "feature_columns": [
+        "rainfall_mm",
+        "temperature_c",
+        "water_level_m",
+        "rain_24h",
+        "rain_48h",
+        "hour",
+        "day",
+        "month",
+        "water_level_prev_1",
+        "water_level_delta"
+      ],
+      "target_classes": [
+        "0",
+        "1"
+      ],
+      "model_type": "keras"
+    }
+  ]
+}
