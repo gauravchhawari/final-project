@@ -71,6 +71,21 @@ Recommended columns:
 .\venv\Scripts\python.exe -m streamlit run frontend\streamlit_app.py
 ```
 
+## Deploy On Render
+
+This repo is set up for two Render web services in [render.yaml](/c:/Users/gujja/OneDrive/Desktop/flood-risk-system/render.yaml):
+
+- `flood-risk-backend` for the FastAPI API
+- `flood-risk-frontend` for the Streamlit dashboard
+
+If you open the backend Render URL, you will only see:
+
+```json
+{"message":"Flood Risk System backend is running."}
+```
+
+Open the `flood-risk-frontend` Render URL to see the actual UI.
+
 ## Train And Evaluate From CLI
 
 ```powershell

@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: pip install -r backend/requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --app-dir backend
+    healthCheckPath: /api/health
     envVars:
       - key: OPENWEATHER_API_KEY
         sync: false
@@ -20,7 +21,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r frontend/requirements.txt
-    startCommand: streamlit run frontend/streamlit_app.py --server.address 0.0.0.0 --server.port $PORT
+    startCommand: streamlit run frontend/streamlit_app.py --server.address 0.0.0.0 --server.port $PORT --server.headless true --server.enableCORS false --server.enableXsrfProtection false --browser.gatherUsageStats false
     envVars:
       - key: BACKEND_URL
         fromService:
