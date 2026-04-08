@@ -49,3 +49,7 @@ node_modules/
 
 # Local matplotlib cache
 .mplconfig/
+
+# ngrok tunnel artifacts
+ngrok.exe
+ngrok.zip

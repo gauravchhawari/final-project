@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+venv
+*.pyc
+__pycache__
+*.pyo
+*.pyd
+.env
+.env.example
+ngrok.exe
+ngrok.zip
+notebooks
+deployment
+frontend
