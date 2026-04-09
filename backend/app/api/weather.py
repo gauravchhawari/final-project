@@ -44,4 +44,4 @@ def search_location(
     try:
         return service.search(query=query, size=size)
     except GeocodingServiceError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
