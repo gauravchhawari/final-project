@@ -35,4 +35,4 @@ def evacuate(payload: EvacuationRequest) -> dict[str, object]:
             model_name=payload.model_name,
         )
     except RoutingServiceError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
