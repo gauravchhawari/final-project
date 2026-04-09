@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
-from datetime import datetime, timezone
 
 import joblib
 import numpy as np
@@ -13,41 +12,12 @@ import pandas as pd
 
 from app.services.altitude_service import AltitudeService
 from app.services.feature_engineering import align_feature_frame, build_live_feature_row
-from app.services.weather_service import WeatherService, WeatherServiceError
+from app.services.weather_service import WeatherService
 from app.utils.constants import MODEL_METADATA_PATH, MODEL_OUTPUTS
 
 
 class PredictionError(RuntimeError):
     """Raised when model inference cannot proceed."""
-
-
-def _build_fallback_weather_payload() -> dict[str, object]:
-    """Return a zeroed weather payload when the live provider is unavailable."""
-    observed_at = datetime.now(timezone.utc)
-    return {
-        "provider": "fallback",
-        "current": {
-            "temperature_c": 0.0,
-            "humidity_pct": 0.0,
-            "pressure_hpa": 0.0,
-            "wind_speed_mps": 0.0,
-            "rainfall_mm_hr": 0.0,
-            "condition": "unavailable",
-            "observation_hour": observed_at.hour,
-            "observation_day": observed_at.day,
-            "observation_month": observed_at.month,
-        },
-        "raw": {},
-    }
-
-
-def _build_fallback_forecast_payload() -> dict[str, object]:
-    """Return an empty forecast payload when the live provider is unavailable."""
-    return {
-        "provider": "fallback",
-        "forecast": [],
-        "city": {},
-    }
 
 
 def list_available_models() -> list[dict[str, Any]]:
@@ -96,16 +66,8 @@ def predict_risk(
     model_entry = _find_model_entry(model_name=model_name, metadata=metadata)
     model = _load_model(model_name=model_name, model_type=model_entry["model_type"])
 
-    warnings: list[str] = []
-    weather_service = WeatherService()
-    try:
-        weather = weather_service.get_current_weather(latitude=latitude, longitude=longitude)
-        forecast = weather_service.get_forecast(latitude=latitude, longitude=longitude)
-    except WeatherServiceError as exc:
-        weather = _build_fallback_weather_payload()
-        forecast = _build_fallback_forecast_payload()
-        warnings.append(f"Live weather unavailable: {exc}")
-
+    weather = WeatherService().get_current_weather(latitude=latitude, longitude=longitude)
+    forecast = WeatherService().get_forecast(latitude=latitude, longitude=longitude)
     altitude = AltitudeService().get_point_elevation(latitude=latitude, longitude=longitude)
     live_row = build_live_feature_row(
         latitude=latitude,
@@ -142,7 +104,6 @@ def predict_risk(
         "model_name": model_name,
         "prediction": label,
         "confidence": round(confidence, 4),
-        "warnings": warnings,
         "features_used": live_row,
         "weather": weather,
         "forecast": forecast,

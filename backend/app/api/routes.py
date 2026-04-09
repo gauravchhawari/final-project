@@ -1,6 +1,5 @@
 """Aggregate API router for the flood risk system."""
 
-import os
 from pathlib import Path
 
 from fastapi import APIRouter
@@ -28,22 +27,12 @@ def config_check() -> dict[str, object]:
     """Report missing keys and files required by the app."""
     settings = get_settings()
     env_path = BASE_DIR / ".env"
-    env_file_present = env_path.exists()
-    has_runtime_env = bool(
-        os.getenv("OPENWEATHER_API_KEY") or os.getenv("OPENROUTESERVICE_API_KEY")
-    )
 
     checks = {
         "env_file": {
-            "ok": env_file_present or has_runtime_env,
+            "ok": env_path.exists(),
             "path": str(env_path.resolve()),
-            "message": (
-                "Loaded from .env file."
-                if env_file_present
-                else "Runtime environment variables detected."
-                if has_runtime_env
-                else "Create a .env file from .env.example or configure environment variables."
-            ),
+            "message": "Create a .env file from .env.example." if not env_path.exists() else "Loaded from .env or environment.",
         },
         "openweather_api_key": {
             "ok": bool(settings.openweather_api_key),
