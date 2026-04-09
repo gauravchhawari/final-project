@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import html
-import json
 import re
 from typing import Any
 
 import requests
 
-from app.models.predict import PredictionError, predict_risk
+from app.models.predict import predict_risk
 from app.services.altitude_service import AltitudeService, AltitudeServiceError
 from app.services.shelter_service import ShelterService, ShelterServiceError
 from app.utils.config import get_settings
@@ -17,10 +16,6 @@ from app.utils.config import get_settings
 
 class RoutingServiceError(RuntimeError):
     """Raised when route optimization cannot proceed."""
-
-    def __init__(self, message: str, status_code: int = 400) -> None:
-        super().__init__(message)
-        self.status_code = status_code
 
 
 class RoutingService:
@@ -41,35 +36,25 @@ class RoutingService:
         destination: tuple[float, float],
     ) -> dict[str, Any]:
         if not self.settings.openrouteservice_api_key:
-            raise RoutingServiceError("OPENROUTESERVICE_API_KEY is not configured.", status_code=500)
+            raise RoutingServiceError("OPENROUTESERVICE_API_KEY is not configured.")
 
-        try:
-            response = requests.post(
-                self.settings.ors_directions_url,
-                headers={
-                    "Authorization": self.settings.openrouteservice_api_key,
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "coordinates": [
-                        [origin[1], origin[0]],
-                        [destination[1], destination[0]],
-                    ],
-                    "instructions": True,
-                },
-                timeout=self.settings.http_timeout_seconds,
-            )
-            response.raise_for_status()
-            payload = response.json()
-        except requests.Timeout as exc:
-            raise RoutingServiceError("Directions service timed out. Please try again.", status_code=504) from exc
-        except requests.HTTPError as exc:
-            raise self._build_http_error(exc) from exc
-        except requests.RequestException as exc:
-            raise RoutingServiceError("Directions service is unavailable right now.", status_code=502) from exc
-        except (ValueError, json.JSONDecodeError) as exc:
-            raise RoutingServiceError("Directions service returned an invalid response.", status_code=502) from exc
-
+        response = requests.post(
+            self.settings.ors_directions_url,
+            headers={
+                "Authorization": self.settings.openrouteservice_api_key,
+                "Content-Type": "application/json",
+            },
+            json={
+                "coordinates": [
+                    [origin[1], origin[0]],
+                    [destination[1], destination[0]],
+                ],
+                "instructions": True,
+            },
+            timeout=self.settings.http_timeout_seconds,
+        )
+        response.raise_for_status()
+        payload = response.json()
         routes = payload.get("routes", [])
         if not routes:
             raise RoutingServiceError("Directions API returned no route options.")
@@ -111,16 +96,13 @@ class RoutingService:
         except ShelterServiceError as exc:
             raise RoutingServiceError(str(exc)) from exc
 
-        try:
-            risk = predict_risk(
-                latitude=latitude,
-                longitude=longitude,
-                live_rainfall_mm_hr=live_rainfall_mm_hr,
-                live_water_level_m=live_water_level_m,
-                model_name=model_name or "xgb",
-            )
-        except PredictionError as exc:
-            raise RoutingServiceError(str(exc)) from exc
+        risk = predict_risk(
+            latitude=latitude,
+            longitude=longitude,
+            live_rainfall_mm_hr=live_rainfall_mm_hr,
+            live_water_level_m=live_water_level_m,
+            model_name=model_name or "xgb",
+        )
         ranked_routes = []
         for shelter in shelters:
             route = self._fetch_route(
@@ -136,7 +118,7 @@ class RoutingService:
                     samples=self.settings.route_altitude_samples,
                 )
             except AltitudeServiceError as exc:
-                raise RoutingServiceError(str(exc), status_code=exc.status_code) from exc
+                raise RoutingServiceError(str(exc)) from exc
 
             score = self._score_route(
                 route=route,
@@ -170,18 +152,3 @@ class RoutingService:
 
         best = min(ranked_routes, key=lambda item: item["route_score"])
         return {"best_route": best, "candidates": ranked_routes}
-
-    def _build_http_error(self, exc: requests.HTTPError) -> RoutingServiceError:
-        """Convert upstream HTTP errors into API-safe routing errors."""
-        status_code = exc.response.status_code if exc.response is not None else 502
-        detail = "Directions provider request failed."
-        try:
-            error_payload = exc.response.json() if exc.response is not None else {}
-            detail = str(error_payload.get("error") or error_payload.get("message") or detail)
-        except (ValueError, json.JSONDecodeError, AttributeError):
-            if exc.response is not None and exc.response.text:
-                detail = exc.response.text.strip() or detail
-        return RoutingServiceError(
-            f"Route lookup failed: {detail}",
-            status_code=502 if status_code >= 500 else 400,
-        )
