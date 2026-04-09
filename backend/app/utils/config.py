@@ -24,6 +24,7 @@ class Settings:
     ors_elevation_point_url: str
     ors_elevation_line_url: str
     ors_geocode_url: str
+    nominatim_search_url: str
     openweather_current_url: str
     openweather_forecast_url: str
     shelter_dataset_path: Path
@@ -68,6 +69,10 @@ def get_settings() -> Settings:
         ors_geocode_url=os.getenv(
             "ORS_GEOCODE_URL",
             "https://api.openrouteservice.org/geocode/search",
+        ),
+        nominatim_search_url=os.getenv(
+            "NOMINATIM_SEARCH_URL",
+            "https://nominatim.openstreetmap.org/search",
         ),
         openweather_current_url=os.getenv(
             "OPENWEATHER_CURRENT_URL",
